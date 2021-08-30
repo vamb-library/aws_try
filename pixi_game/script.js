@@ -19,6 +19,7 @@ app.renderer.backgroundColor = 0x333333;
 
 // ゲームで使用する画像をあらかじめ読み込んでおく(プリロードという)
 PIXI.loader.add("ball.png");
+PIXI.loader.add("sam.png");
 
 // プリロード処理が終わったら呼び出されるイベント
 PIXI.loader.load((loader, resources) =>
@@ -163,7 +164,7 @@ PIXI.loader.load((loader, resources) =>
                 ball.x = 0; // xの値を0にする(次のフレームで反射処理させないために必要)
                 ballVx = -ballVx; // 速度を反転して反射の挙動にする
             }
-            ballVy += 0.1; // yの速度に0.1を足していくと、重力みたいな挙動になる
+            ballVy += 0.2; // yの速度に0.1を足していくと、重力みたいな挙動になる
             if (ball.y >= 600) // 球が画面下に消えたら
             {
                 createEndScene(); // 結果画面を表示する
