@@ -15,7 +15,7 @@
 <div id="header">
 
 <h1>vamb@ch</h1>
-<h4 style="color : ff8c00">ちょっと頑張ってみよう</h4>
+<h4 style="color : ff8c00">ちょっと頑張ってみよう_k</h4>
 
 <h2>投稿するところ</h2>
 <form action="bbs.php" method="post" role="form">
