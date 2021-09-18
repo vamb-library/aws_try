@@ -15,7 +15,7 @@
 <div id="header">
 
 <h1>vamb@ch</h1>
-<h4 style="color : ff8c00">一旦放置</h4>
+<h4 style="color : ff8c00">ちょっと頑張ってみよう_</h4>
 
 <h2>投稿するところ</h2>
 <form action="bbs.php" method="post" role="form">
@@ -36,33 +36,64 @@
 $dbs = "mysql:host=127.0.0.1;dbname=lesson;charset=utf8";
 $db_user = "root";
 $db_pass = "Seikimatu-4869";
-$pdo = new PDO($dbs, $db_user, $db_pass);
+$options = array(
+  PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+  PDO::MYSQL_ATTR_MULTI_STATEMENTS => false,
+);
 
-//セッションスタート
-//session_start();
-
-// 変数の設定
-$content = $_POST["content"];
-$u_name = $_POST["user_name"];
-$delete_id = $_POST["delete_id"];
-
-//投稿内容がからじゃないかつ投稿ボタンが押されたらデータベースへのデータの挿入
-if( isset($_POST["submit_btn"]) ){
-  if(!empty($content)){ //空じゃなけりゃ
-    echo "投稿されました。一番下";
-    var_dump($_POST);
-  
-    //データベースへ挿入
-    $sql  = "INSERT INTO bbs (content, updated_at, user_name) VALUES (:content, NOW(), :user_name);";
-    $stmt = $pdo->prepare($sql);
-    $stmt -> bindValue(":content", $content, PDO::PARAM_STR);
-    $stmt -> bindValue(":user_name", $u_name, PDO::PARAM_STR);
-    $stmt -> execute();
-
-  }else{  //空ならエラー
-    echo "投稿に失敗（投稿内容が空です。）";
-  }
+try{
+  $pdo = new PDO($dbs, $db_user, $db_pass, $options);
+}catch(PDOException $ex){  //接続が失敗したとき
+  $error_message[] = $ex->getMessage();
 }
+
+//トランザクション開始
+$pdo->beginTransaction();
+try{
+  // 変数の設定
+  $content = $_POST["content"];
+  $u_name = $_POST["user_name"];
+  $delete_id = $_POST["delete_id"];
+
+  //投稿ボタンが押されたらデータベースへのデータの挿入開始
+  if( isset($_POST["submit_btn"]) ){
+    //名前が空ならエラー文
+    if(empty($u_name)){
+      $error_message[] = "名前を入力せよ";
+    }
+
+    //投稿内容が空ならエラー文
+    if(empty($content)){
+      $error_message[] = "投稿内容を入力せよ";
+    }
+
+    if(!empty($error_message)){ //エラー文がなければ
+      //var_dump($_POST);
+    
+      //データベースへ挿入
+      $sql  = "INSERT INTO bbs (content, updated_at, user_name) VALUES (:content, NOW(), :user_name);";
+      $stmt = $pdo->prepare($sql);
+      $stmt -> bindValue(":content", $content, PDO::PARAM_STR);
+      $stmt -> bindValue(":user_name", $u_name, PDO::PARAM_STR);
+      $stmt -> execute();
+
+      //コミット
+      $res = $pdo->commit();
+
+      if($res){
+        $suc_meg = "投稿されました。一番下";
+      }else{
+        $error_message[] = "書き込みに失敗";
+      }
+    }else{  //エラー分があれば
+      echo "投稿に失敗";
+    }
+  }
+} catch(Exception $ex){
+  $pdo->rollBack();
+}
+
+
 
 // データベースのデータの削除
 $sql = "DELETE FROM bbs WHERE ip = :delete_id;";
