@@ -1,9 +1,44 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <title>vamb掲示板_練習</title>
+
+  <!-- bootstrap CDN 3.3-->
+  <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"/>
+  <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+
+
+  <!-- bootstrap CDN 5.0->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" 
+  rel="stylesheet" 
+  integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" 
+  crossorigin="anonymous">
+-->
+  
   <style type=text/css>
     div#header{background-color:#e0ffff;}
+
+    td{
+      border-bottom: solid 2px #c71585;
+    }
+
+    th{
+      border-bottom: solid 2px #c71585;
+    }
+
+    textarea{
+      resize: vertical;
+    }
+
+    .bar1{
+      display: block;
+      width: 80%;
+      height: 1px;
+      position: relative;
+      left: -70px;
+      background-color: #696969;
+      /*border: none;*/
+    }
   
     .success_message {
       margin: 20px;
@@ -40,10 +75,8 @@
     line-height: 1.6em;
     }
   </style>
+
   
-  <!-- bootstrap CDN -->
-  <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"/>
-  <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
 </head>
 
 <body>
@@ -51,20 +84,33 @@
 <div id="header">
 
 <h1>vamb@ch</h1>
-<h4 style="color: #ff8c00">ちょっと頑張ってみよう_</h4>
+<h4 style="color: #ff8c00;">ちょっと頑張ってみよう_</h4>
+<hr class = "bar1">最近の変更内容</hr>
+<ul style = "list-style-type: disc">
+  <li>システムメッセージを追加</li>
+    <ul style = "list-style-type: none">
+      <li>投稿時、投稿エラー時、削除時のメッセジ</li>
+    </ul>
+
+  <li>投稿リストを上が最新になるようにした</li>
+  <li>改行を反映を反映するようにした</li>
+  <li>空白のみでは投稿不可にした</li>
+  <li>ちょっとデザイン考え中</li>
+</ul>
 
 <h2>投稿するところ</h2>
-<form action="bbs.php" method="post" role="form">
-  <div class="form-group">
-    <label class="control-label">名前</label>
+<form style = "background-color:#b0c4de; border: none; border-radius: 5px;" 
+action="bbs.php" method="post" role="form">
+  <div class="form-group" style = "width: 30%;">
+    <label class="control-label" style = "margin: 10px;">名前</label>
     <input type="text" name="user_name" class="form-control" placeholder="名前"/>
   </div>
   <div class="form-group">
-    <label class="control-label">投稿内容</label>
+    <label class="control-label" style = "margin: 10px;">投稿内容</label>
     <!--<input type="text" name="content" class="form-control" placeholder="投稿内容"/>-->
     <textarea name="content" class="form-control" placeholder="それってあなたの感想ですよね？"></textarea>
   </div>
-  <button type="submit" name="submit_btn" class="btn btn-primary">投稿</button>
+  <button type="submit" name="submit_btn" class="btn btn-primary" style = "margin: 10px;">投稿</button>
 </form>
 
 <?php
@@ -80,14 +126,15 @@ $options = array(
 try{
   $pdo = new PDO($dbs, $db_user, $db_pass, $options);
 }catch(PDOException $ex){  //接続が失敗したとき
-  $error_message[] = $ex->getMessage();
+  $error_message[] = "DBの接続に失敗 ". $ex->getMessage();
 }
 
 // 変数の設定
-$content = $_POST["content"];
-$u_name = $_POST["user_name"];
+//名前と投稿内容は空白や制御文字を無視するように設定する
+$content = preg_replace("/\A[\p{C}\p{Z}]++|[\p{C}\p{Z}]++\z/u", "", $_POST["content"]);
+$u_name = preg_replace("/\A[\p{C}\p{Z}]++|[\p{C}\p{Z}]++\z/u", "", $_POST["user_name"]);
 $delete_id = $_POST["delete_id"];
-$error_message = array();   //エラー文をここに格納
+$error_message = array();   //各エラー文をここに格納していく
 $res = null;
 
 //投稿ボタンが押されたらデータベースへのデータの挿入開始
@@ -123,7 +170,7 @@ if( isset($_POST["submit_btn"]) ){
       //$res = 0;
     }catch(Exception $ex){ //コミットまで何らかのエラーがあればロールバック
       $pdo->rollBack();
-      echo "失敗したrollback". $ex->getMessage();
+      $error_message[] = "DBの挿入に失敗 ". $ex->getMessage();
     }
 
     if($res){
@@ -158,12 +205,13 @@ try{
 }
 if($res){
   $del_meg = "投稿が削除されました。: ". $delete_id. "<br /> この事象は管理者に報告され、
-  操作元を特定します。<br /> って書いたらビビるよなぁ。";
+  操作元を特定します。<br /> って書いたらビビるよなぁ";
 }else{
   $error_message[] = "削除に失敗しました。";
 }
 
 // データベースからのデータの取得
+$order = "DESC";  //降順
 $sql = "SELECT * FROM bbs ORDER BY updated_at $order;";
 $stmt = $pdo->prepare($sql);
 $stmt -> execute();
@@ -209,7 +257,7 @@ if(!empty($delete_id)){
 ?>
 
 <h2>投稿リスト</h2>
-<table class="table">
+<table class="table" >
 <tr>
   <th>No.</th>
   <!--<th>id</th>-->
@@ -233,11 +281,11 @@ while ($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
 <?php
   }
 ?>
-  <td><?php echo "$i"; ?></td>
-  <!--<td><?php echo "$row[ip]"; ?></td>-->
+  <th><?php echo "$i"; ?></th>
+  <!--<td>?php echo "$row[ip]"; ?></td>-->
   <td><?php echo "$row[user_name]"; ?></td>
   <td><?php echo "$row[updated_at]"; ?></td>
-  <td><?php echo "$row[content]"; ?></td>
+  <td><?php echo nl2br(strip_tags("$row[content]")); ?></td>
   <td>
     <form action="bbs.php" method="post" role="form">
       <button type="submit" class="btn btn-danger">削除</button>
