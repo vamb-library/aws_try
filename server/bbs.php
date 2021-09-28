@@ -27,7 +27,10 @@
     }
 
     textarea{
+      margin: 10px;
       resize: vertical;
+      max-height: 200px;
+      min-height: 35px;
     }
 
     .bar1{
@@ -80,22 +83,15 @@
 </head>
 
 <body>
-<div class="container">
+<div class="container-fluid">
 <div id="header">
 
 <h1>vamb@ch</h1>
-<h4 style="color: #ff8c00;">ちょっと頑張ってみよう_</h4>
-<hr class = "bar1">最近の変更内容</hr>
+<h4 style="color: #ff8c00;">このページは終わり</h4>
+<hr class = "bar1">最近の変更内容 (21. 9/28)</hr>
 <ul style = "list-style-type: disc">
-  <li>システムメッセージを追加</li>
-    <ul style = "list-style-type: none">
-      <li>投稿時、投稿エラー時、削除時のメッセジ</li>
-    </ul>
-
-  <li>投稿リストを上が最新になるようにした</li>
-  <li>改行を反映を反映するようにした</li>
-  <li>空白のみでは投稿不可にした</li>
-  <li>ちょっとデザイン考え中</li>
+  <li style= "font-size: large; color: #ff1493">このページを移行しました。
+      今後は”  ipどれセス/bbs/  ”でお願いします。</li>
 </ul>
 
 <h2>投稿するところ</h2>
@@ -103,21 +99,22 @@
 action="bbs.php" method="post" role="form">
   <div class="form-group" style = "width: 30%;">
     <label class="control-label" style = "margin: 10px;">名前</label>
-    <input type="text" name="user_name" class="form-control" placeholder="名前"/>
+    <input type="text" name="user_name" class="form-control" style = "margin: 10px;" placeholder="名前"/>
   </div>
-  <div class="form-group">
+  <div class="form-group" style = "width: 90%">
     <label class="control-label" style = "margin: 10px;">投稿内容</label>
     <!--<input type="text" name="content" class="form-control" placeholder="投稿内容"/>-->
-    <textarea name="content" class="form-control" placeholder="それってあなたの感想ですよね？"></textarea>
+    <textarea name="content" class="form-control" maxlength = "300" placeholder="それってあなたの感想ですよね？"></textarea>
   </div>
   <button type="submit" name="submit_btn" class="btn btn-primary" style = "margin: 10px;">投稿</button>
 </form>
 
 <?php
+ini_set("display_errors", 0);
 // データベースへ接続
-$dbs = "mysql:host=127.0.0.1;dbname=lesson;charset=utf8";
+/*$dbs = "mysql:host=127.0.0.1;dbname=lesson;charset=utf8";
 $db_user = "root";
-$db_pass = "Seikimatu-4869";
+$db_pass = "Seikimatu-4869";*/
 $options = array(
   PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
   PDO::MYSQL_ATTR_MULTI_STATEMENTS => false,
@@ -137,18 +134,21 @@ $delete_id = $_POST["delete_id"];
 $error_message = array();   //各エラー文をここに格納していく
 $res = null;
 
+//セッションスタート
+session_start();
+
 //投稿ボタンが押されたらデータベースへのデータの挿入開始
 if( isset($_POST["submit_btn"]) ){
   //名前が空ならエラー文を記録
   if(empty($u_name)){
     $error_message[] = "名前を入力せよ";
-    //echo "名前を入力しよ<br />";
+  }else{  //入力されていればそれをセッションに保存する。
+    $_SESSION['u_name'] = $u_name;
   }
 
   //投稿内容が空ならエラー文
   if(empty($content)){
     $error_message[] = "投稿内容を入力せよ";
-    //echo "投稿内容を入力せよ<br />";
   }
 
   if(empty($error_message)){ //エラー文がなければ
@@ -176,14 +176,11 @@ if( isset($_POST["submit_btn"]) ){
     if($res){
       //データベースに挿入できたら成功メッセージを格納
       $suc_meg = "投稿されました。一番下";
-      //echo "投稿されたよ";
     }else{
       $error_message[] = "投稿内容の書き込みに失敗しました";
-      //echo "書き込みに失敗";
     }
   }else{  //エラー分があれば
     $error_message[] = "投稿に失敗しました";
-    //echo "投稿に失敗しました。";
   }
 }
 
@@ -201,11 +198,11 @@ try{
 }catch(Exception $ex){
   $pdo -> rollBack();
   $error_message[] = $ex -> getMessage();
-  echo "削除に失敗rollBack". $ex -> getMessage();
+  //echo "削除に失敗rollBack". $ex -> getMessage();
 }
 if($res){
-  $del_meg = "投稿が削除されました。: ". $delete_id. "<br /> この事象は管理者に報告され、
-  操作元を特定します。<br /> って書いたらビビるよなぁ";
+  $del_meg = "投稿が削除されました。: ". $delete_id. "<br /> この事象は管理者に報告されます。
+  <br /> (嘘です無理です。)";
 }else{
   $error_message[] = "削除に失敗しました。";
 }
@@ -257,7 +254,7 @@ if(!empty($delete_id)){
 ?>
 
 <h2>投稿リスト</h2>
-<table class="table" >
+<table class="table" style="font: normal medium ヒラギノ角ゴシック" >
 <tr>
   <th>No.</th>
   <!--<th>id</th>-->
@@ -285,7 +282,7 @@ while ($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
   <!--<td>?php echo "$row[ip]"; ?></td>-->
   <td><?php echo "$row[user_name]"; ?></td>
   <td><?php echo "$row[updated_at]"; ?></td>
-  <td><?php echo nl2br(strip_tags("$row[content]")); ?></td>
+  <td><?php echo nl2br(htmlspecialchars("$row[content]")); ?></td>
   <td>
     <form action="bbs.php" method="post" role="form">
       <button type="submit" class="btn btn-danger">削除</button>
