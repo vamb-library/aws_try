@@ -22,7 +22,10 @@
 -->
   
   <style type=text/css>
-    div#header{background-color:#e0ffff;}
+    div#header{
+        background-color:#e0ffff;
+        border-radius: 10px;
+    }
 
     td{
       border-bottom: solid 2px #c71585;
@@ -83,6 +86,9 @@
     font-size: 86%;
     line-height: 1.6em;
     }
+    tr:hover{
+        background-color: #ffe6f0;
+    }
   </style>
 
   
@@ -93,17 +99,14 @@
 <div id="header">
 
 <h1>vamb@ch</h1>
-<h4 style="color: #ff8c00;">ちょっとバグり中</h4>
-<hr class = "bar1">最近の変更内容 (21. 9/20)</hr>
+<h4 style="color: #ff8c00;">ちょっと頑張ろう＿＿</h4>
+<hr class = "bar1">最近の変更内容 (21. 9/28)</hr>
 <ul style = "list-style-type: disc">
-  <li>システムメッセージを追加</li>
+  <li>名前を入力して投稿したら、名前が保存されるようにした。</li>
     <ul style = "list-style-type: none">
-      <li>投稿時、投稿エラー時、削除時のメッセジ</li>
+      <li>連続して投稿する際、名前を省略するようにした</li>
     </ul>
-
-  <li>投稿リストを上が最新になるようにした</li>
-  <li>改行を反映を反映するようにした</li>
-  <li>空白のみでは投稿不可にした</li>
+  <li>ちょっとしたデザイン改良？</li>
 </ul>
 <hr class = "bar1">次</hr>
 <ul style = "list-style-type: disc">
@@ -113,11 +116,12 @@
 </ul>
 
 <h2>投稿するところ</h2>
-<form style = "background-color:#b0c4de; border: none; border-radius: 5px;" 
-action="" method="post" role="form">
+<form style = "background-color:#b0c4de; border: none; border-radius: 5px;" action="" method="post" role="form">
   <div class="form-group" style = "width: 30%;">
     <label class="control-label" style = "margin: 10px;">名前</label>
-    <input type="text" name="user_name" class="form-control" style = "margin: 10px;" placeholder="名前"/>
+    <input type="text" name="user_name" class="form-control" style = "margin: 10px;" maxlength="15"
+        value="<?php if(!empty($_SESSION['u_name'])) echo htmlspecialchars($_SESSION['u_name'], ENT_QUOTES, "UTF-8"); ?>" 
+        placeholder="名前"/>
   </div>
   <div class="form-group" style = "width: 90%">
     <label class="control-label" style = "margin: 10px;">投稿内容</label>
@@ -134,7 +138,7 @@ action="" method="post" role="form">
 ?>
 
 <h2>投稿リスト</h2>
-<table class="table" style="font: normal medium ヒラギノ角ゴシック" >
+<table class="table" style="font: normal medium ヒラギノ角ゴシック; border-collapse: separate;" >
 <tr>
   <th>No.</th>
   <!--<th>id</th>-->
@@ -162,10 +166,10 @@ while ($row = $stmt -> fetch(PDO::FETCH_ASSOC)) {
   <!--<td>?php echo "$row[ip]"; ?></td>-->
   <td><?php echo "$row[user_name]"; ?></td>
   <td><?php echo "$row[updated_at]"; ?></td>
-  <td><?php echo nl2br(htmlspecialchars("$row[content]")); ?></td>
-  <td>
+  <td><?php echo nl2br(htmlspecialchars("$row[content]", ENT_QUOTES, "UTF-8")); ?></td>
+  <td style="text-align: center; vertical-align: bottom;">
     <form action="" method="post" role="form">
-      <button type="submit" class="btn btn-danger">削除</button>
+      <button type="submit" class="btn btn-danger" style="margin-bottom: -10px;">削除</button>
       <div class="form-group">
         <input type="hidden" name="delete_id" value="<?php echo "$row[ip]"; ?>" class="form-control"/>
       </div>

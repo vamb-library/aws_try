@@ -76,10 +76,10 @@ if( isset($_POST["submit_btn"]) ){
 try{
   $pdo -> beginTransaction();
 
-  $sql = "DELETE FROM bbs WHERE ip = :delete_id;";
+  /*$sql = "DELETE FROM bbs WHERE ip = :delete_id;";
   $stmt = $pdo->prepare($sql);
   $stmt -> bindValue(":delete_id", $delete_id, PDO::PARAM_STR);
-  $stmt -> execute();
+  $stmt -> execute();*/
 
   $res = $pdo -> commit();
   //$res = 0;
@@ -89,7 +89,7 @@ try{
   echo "削除に失敗rollBack". $ex -> getMessage();
 }
 if($res){
-  $del_meg = "投稿が削除されました。: ". $delete_id. "<br /> この事象は管理者に報告されます。
+  $del_meg = "投稿は削除されてないです。: ". $delete_id. "<br /> この事象は管理者に報告されます。
   <br /> (嘘です無理です。)";
 }else{
   $error_message[] = "削除に失敗しました。";
