@@ -13,6 +13,9 @@
   <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"/>
   <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
 
+  <link rel="icon" href="/img/article.png" sizes="16x16" type="image/png">
+  <link rel="icon" href="/img/article.png" sizes="32x32" type="image/png">
+
 
   <!-- bootstrap CDN 5.0->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" 
@@ -99,7 +102,7 @@
 <div id="header">
 
 <h1>vamb@ch</h1>
-<h4 style="color: #ff8c00;">ちょっと頑張ろう＿＿</h4>
+<h4 style="color: #ff8c00;">放置中</h4>
 <hr class = "bar1">最近の変更内容 (21. 9/28)</hr>
 <ul style = "list-style-type: disc">
   <li>名前を入力して投稿したら、名前が保存されるようにした。</li>
